@@ -50,3 +50,6 @@ htmlcov/
 
 # Logs
 *.log
+
+# Firebase credentials - NEVER commit this!
+hackwestern-f614b-firebase-adminsdk-fbsvc-b68747eb4a.json

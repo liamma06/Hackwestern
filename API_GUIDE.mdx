@@ -1,0 +1,198 @@
+# 🚀 Quick API Reference Guide
+
+## Backend - FastAPI Routes
+
+### Authentication Dependency (Use in every protected route)
+
+```python
+async def get_user_id(authorization: str = Header(...)):
+    try:
+        token = authorization.split("Bearer ")[1]
+        decoded = auth.verify_id_token(token)
+        return decoded["uid"]
+    except:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+```
+
+### Route Pattern
+
+```python
+@app.METHOD("/api/route")
+async def function_name(user_id: str = Depends(get_user_id)):
+    # user_id is automatically from verified token
+    return {"data": "something"}
+```
+
+### Examples
+
+#### GET - Fetch user's data
+```python
+@app.get("/api/data")
+async def get_data(user_id: str = Depends(get_user_id)):
+    return {"user_id": user_id, "data": ["item1", "item2"]}
+```
+
+#### POST - Save data
+```python
+@app.post("/api/data")
+async def save_data(data: dict, user_id: str = Depends(get_user_id)):
+    return {"saved": True, "user_id": user_id, "data": data}
+```
+
+#### GET with path parameter
+```python
+@app.get("/api/items/{item_id}")
+async def get_item(item_id: str, user_id: str = Depends(get_user_id)):
+    return {"item_id": item_id, "user_id": user_id}
+```
+
+#### PUT - Update
+```python
+@app.put("/api/items/{item_id}")
+async def update_item(item_id: str, data: dict, user_id: str = Depends(get_user_id)):
+    return {"updated": True, "item_id": item_id}
+```
+
+#### DELETE
+```python
+@app.delete("/api/items/{item_id}")
+async def delete_item(item_id: str, user_id: str = Depends(get_user_id)):
+    return {"deleted": True, "item_id": item_id}
+```
+
+#### GET with query parameters
+```python
+@app.get("/api/items")
+async def list_items(
+    skip: int = 0, 
+    limit: int = 10,
+    user_id: str = Depends(get_user_id)
+):
+    return {"items": [], "skip": skip, "limit": limit}
+```
+
+#### File upload
+```python
+@app.post("/api/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_user_id)
+):
+    return {"filename": file.filename, "user_id": user_id}
+```
+
+---
+
+## Frontend - API Calls
+
+### API Helper Function
+
+```typescript
+import { auth } from "./firebase";
+
+const API_URL = "http://localhost:8000";
+
+export async function apiCall(endpoint: string, options: RequestInit = {}) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not logged in");
+
+  const token = await user.getIdToken();
+
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+  if (!res.ok) throw new Error("API error");
+  return res.json();
+}
+```
+
+### Call Patterns
+
+#### GET request
+```typescript
+const data = await apiCall("/api/data");
+```
+
+#### POST request
+```typescript
+const result = await apiCall("/api/data", {
+  method: "POST",
+  body: JSON.stringify({ message: "hello", value: 42 }),
+});
+```
+
+#### GET with path parameter
+```typescript
+const item = await apiCall("/api/items/123");
+```
+
+#### PUT request
+```typescript
+const updated = await apiCall("/api/items/123", {
+  method: "PUT",
+  body: JSON.stringify({ title: "Updated Title" }),
+});
+```
+
+#### DELETE request
+```typescript
+await apiCall("/api/items/123", {
+  method: "DELETE",
+});
+```
+
+#### GET with query parameters
+```typescript
+const items = await apiCall("/api/items?skip=0&limit=10");
+```
+
+### Organized API Functions
+
+```typescript
+export const api = {
+  // Data
+  getData: () => apiCall("/api/data"),
+  saveData: (data: any) => apiCall("/api/data", {
+    method: "POST",
+    body: JSON.stringify(data),
+  }),
+
+  // Items
+  getItems: (skip = 0, limit = 10) => 
+    apiCall(`/api/items?skip=${skip}&limit=${limit}`),
+  getItem: (id: string) => apiCall(`/api/items/${id}`),
+  createItem: (data: any) => apiCall("/api/items", {
+    method: "POST",
+    body: JSON.stringify(data),
+  }),
+  updateItem: (id: string, data: any) => apiCall(`/api/items/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  }),
+  deleteItem: (id: string) => apiCall(`/api/items/${id}`, {
+    method: "DELETE",
+  }),
+};
+```
+
+### Use in Components
+
+```typescript
+import { apiCall, api } from "@/lib/api";
+
+// Direct call
+const data = await apiCall("/api/data");
+
+// Using organized functions
+const items = await api.getItems();
+await api.createItem({ title: "New Item" });
+await api.deleteItem("123");
+```
+
+---
