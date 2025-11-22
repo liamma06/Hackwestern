@@ -1,6 +1,60 @@
+"use client";
+
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
+import { apiCall } from "@/lib/api";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function HomePage() {
+  const { user, logout, loading } = useAuth();
+  const router = useRouter();
+  const [data, setData] = useState(null);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  // Fetch data when user is authenticated
+  useEffect(() => {
+    if (user) {
+      apiCall("/api/data").then(setData).catch(console.error);
+    }
+  }, [user]);
+
+  const saveData = async () => {
+    try {
+      await apiCall("/api/data", {
+        method: "POST",
+        body: JSON.stringify({ example: "data" }),
+      });
+      alert("Saved!");
+    } catch (error) {
+      console.error("Error saving:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-950">
       {/* Navigation */}
@@ -11,6 +65,7 @@ export default function HomePage() {
             <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">SeatSense</span>
           </div>
           <div className="hidden items-center gap-6 md:flex">
+            <span className="text-sm text-zinc-600 dark:text-zinc-400">{user.email}</span>
             <a href="#features" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
               Features
             </a>
@@ -23,9 +78,12 @@ export default function HomePage() {
             <a href="/map" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
               Occupancy
             </a>
-            <a href="/map" className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
-              View Map
-            </a>
+            <button
+              onClick={handleLogout}
+              className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
+            >
+              Logout
+            </button>
           </div>
           <button className="md:hidden">
             <svg className="h-6 w-6 text-zinc-900 dark:text-zinc-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">

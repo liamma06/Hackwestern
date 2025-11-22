@@ -32,7 +32,7 @@ export default function Signup() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard"); 
+      router.push("/home"); 
     } catch (err: any) {
       setError(err.message || "Failed to create account");
     } finally {
@@ -47,7 +47,7 @@ export default function Signup() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push("/dashboard");
+      router.push("/home");
     } catch (err: any) {
       setError(err.message || "Failed to sign up with Google");
     } finally {
