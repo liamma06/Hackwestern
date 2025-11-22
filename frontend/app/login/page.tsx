@@ -20,7 +20,7 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "Failed to sign in");
     } finally {
@@ -35,7 +35,7 @@ export default function Login() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "Failed to sign in with Google");
     } finally {
