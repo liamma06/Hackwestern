@@ -198,7 +198,7 @@ export default function OccupancyPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"></div>
-            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Library Occupancy</span>
+            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Find My Seat</span>
           </div>
           <div className="flex items-center gap-4">
             <a
@@ -347,71 +347,6 @@ export default function OccupancyPage() {
           </p>
         </div>
 
-        {/* Seat Details Panel */}
-        {selectedSeat && (
-          <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                Seat Details: {selectedSeat.id}
-              </h3>
-              <button
-                onClick={() => setSelectedSeat(null)}
-                className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Status</p>
-                <p className={`text-lg font-semibold ${selectedSeat.occupied ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
-                  {selectedSeat.occupied ? "Occupied" : "Available"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Popularity Score</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.popularity}%</p>
-                  <div className="flex-1 h-2 bg-zinc-200 rounded-full dark:bg-zinc-700">
-                    <div
-                      className={`h-2 rounded-full ${
-                        selectedSeat.popularity >= 80
-                          ? "bg-yellow-500"
-                          : selectedSeat.popularity >= 60
-                          ? "bg-blue-500"
-                          : "bg-zinc-400"
-                      }`}
-                      style={{ width: `${selectedSeat.popularity}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Total Hours Used</p>
-                <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.totalHoursUsed} hrs</p>
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Average Session Time</p>
-                <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.averageSessionTime} min</p>
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Last Updated</p>
-                <p className="text-sm text-zinc-900 dark:text-zinc-50">
-                  {new Date(selectedSeat.lastUpdated || "").toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Last Occupied</p>
-                <p className="text-sm text-zinc-900 dark:text-zinc-50">
-                  {selectedSeat.lastOccupiedAt
-                    ? new Date(selectedSeat.lastOccupiedAt).toLocaleString()
-                    : "Never"}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Database Data Display */}
         <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
           <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Database Statistics</h3>
@@ -454,6 +389,86 @@ export default function OccupancyPage() {
           </div>
         </div>
       </div>
+
+      {/* Seat Details Modal Popup */}
+      {selectedSeat && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedSeat(null)}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          
+          {/* Modal Content */}
+          <div
+            className="relative w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-6">
+              <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                Seat Details: {selectedSeat.id}
+              </h3>
+              <button
+                onClick={() => setSelectedSeat(null)}
+                className="rounded-full p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                aria-label="Close"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Status</p>
+                <p className={`text-xl font-semibold ${selectedSeat.occupied ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                  {selectedSeat.occupied ? "Occupied" : "Available"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Popularity Score</p>
+                <div className="space-y-2">
+                  <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.popularity}%</p>
+                  <div className="h-3 bg-zinc-200 rounded-full dark:bg-zinc-700">
+                    <div
+                      className={`h-3 rounded-full transition-all ${
+                        selectedSeat.popularity >= 80
+                          ? "bg-yellow-500"
+                          : selectedSeat.popularity >= 60
+                          ? "bg-blue-500"
+                          : "bg-zinc-400"
+                      }`}
+                      style={{ width: `${selectedSeat.popularity}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Total Hours Used</p>
+                <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.totalHoursUsed} hrs</p>
+              </div>
+              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Average Session Time</p>
+                <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.averageSessionTime} min</p>
+              </div>
+              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Last Updated</p>
+                <p className="text-sm text-zinc-900 dark:text-zinc-50">
+                  {new Date(selectedSeat.lastUpdated || "").toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Last Occupied</p>
+                <p className="text-sm text-zinc-900 dark:text-zinc-50">
+                  {selectedSeat.lastOccupiedAt
+                    ? new Date(selectedSeat.lastOccupiedAt).toLocaleString()
+                    : "Never"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

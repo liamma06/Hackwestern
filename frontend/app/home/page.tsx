@@ -62,7 +62,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"></div>
-            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">SeatSense</span>
+            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Find My Seat</span>
           </div>
           <div className="hidden items-center gap-6 md:flex">
             <span className="text-sm text-zinc-600 dark:text-zinc-400">{user.email}</span>
@@ -105,7 +105,7 @@ export default function HomePage() {
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Real-Time Seating Solutions</span>
           </h1>
           <p className="mb-10 text-lg leading-8 text-zinc-600 dark:text-zinc-400 sm:text-xl">
-            Get straight to work and skip the seat searching. Built with modern tech stack and designed for students, by students.
+            Get straight to work and skip the seat searching. Stop roaming around like an NPC and get to scrolling those reels.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a href="/map" className="w-full rounded-full bg-zinc-900 px-8 py-4 text-base font-semibold text-white transition-all hover:bg-zinc-800 hover:shadow-lg dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 sm:w-auto text-center">
@@ -288,7 +288,7 @@ export default function HomePage() {
           <div className="mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-800">
             <div className="flex flex-col items-center justify-center">
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                © 2025 SeatSense - HackWestern 2025. All rights reserved.
+                © 2025 Find My Seat - HackWestern 2025. All rights reserved.
               </p>
             </div>
           </div>
