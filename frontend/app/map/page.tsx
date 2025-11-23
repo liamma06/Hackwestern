@@ -26,6 +26,186 @@ interface Table {
   row: number; // Row index (0, 1, or 2)
 }
 
+// Generate initial data with all zeros (for initial load)
+function generateInitialData(): Table[] {
+  const now = new Date();
+  
+  // Uniform seat positions for all tables (4 seats: 2 on top, 2 on bottom) - OUTSIDE the table
+  const uniformSeatPositions = [
+    { x: 30, y: -20 },   // Top left (outside table)
+    { x: 70, y: -20 },   // Top right (outside table)
+    { x: 30, y: 120 },   // Bottom left (outside table)
+    { x: 70, y: 120 },   // Bottom right (outside table)
+  ];
+
+  const generateSeatData = (
+    id: string,
+    x: number,
+    y: number,
+    occupied: boolean,
+    popularity: number,
+    totalHours: number,
+    avgSession: number
+  ): Seat => ({
+    id,
+    x,
+    y,
+    occupied,
+    popularity,
+    totalHoursUsed: totalHours,
+    averageSessionTime: avgSession,
+    lastUpdated: now.toISOString(),
+    lastOccupiedAt: undefined,
+  });
+
+  // Helper to generate seats with all zeros
+  const generateTableSeats = (tableId: string) => {
+    return uniformSeatPositions.map((pos, index) => {
+      const seatId = `${tableId}-s${index + 1}`;
+      return generateSeatData(seatId, pos.x, pos.y, false, 0, 0, 0);
+    });
+  };
+
+  // Centered 4x3 grid layout - each row will be in its own section
+  const gridPositions = [
+    { x: 15, y: 15, row: 0 }, // Row 1 - in first section
+    { x: 40, y: 15, row: 0 },
+    { x: 65, y: 15, row: 0 },
+    { x: 15, y: 15, row: 1 }, // Row 2 - in second section
+    { x: 40, y: 15, row: 1 },
+    { x: 65, y: 15, row: 1 },
+    { x: 15, y: 15, row: 2 }, // Row 3 - in third section
+    { x: 40, y: 15, row: 2 },
+    { x: 65, y: 15, row: 2 },
+    { x: 15, y: 15, row: 3 }, // Row 4 - in fourth section
+    { x: 40, y: 15, row: 3 },
+    { x: 65, y: 15, row: 3 },
+  ];
+
+  return [
+    {
+      id: "table-1",
+      name: "Table 1",
+      x: gridPositions[0].x,
+      y: gridPositions[0].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t1"),
+      row: gridPositions[0].row,
+    },
+    {
+      id: "table-2",
+      name: "Table 2",
+      x: gridPositions[1].x,
+      y: gridPositions[1].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t2"),
+      row: gridPositions[1].row,
+    },
+    {
+      id: "table-3",
+      name: "Table 3",
+      x: gridPositions[2].x,
+      y: gridPositions[2].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t3"),
+      row: gridPositions[2].row,
+    },
+    {
+      id: "table-4",
+      name: "Table 4",
+      x: gridPositions[3].x,
+      y: gridPositions[3].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t4"),
+      row: gridPositions[3].row,
+    },
+    {
+      id: "table-5",
+      name: "Table 5",
+      x: gridPositions[4].x,
+      y: gridPositions[4].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t5"),
+      row: gridPositions[4].row,
+    },
+    {
+      id: "table-6",
+      name: "Table 6",
+      x: gridPositions[5].x,
+      y: gridPositions[5].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t6"),
+      row: gridPositions[5].row,
+    },
+    {
+      id: "table-7",
+      name: "Table 7",
+      x: gridPositions[6].x,
+      y: gridPositions[6].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t7"),
+      row: gridPositions[6].row,
+    },
+    {
+      id: "table-8",
+      name: "Table 8",
+      x: gridPositions[7].x,
+      y: gridPositions[7].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t8"),
+      row: gridPositions[7].row,
+    },
+    {
+      id: "table-9",
+      name: "Table 9",
+      x: gridPositions[8].x,
+      y: gridPositions[8].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t9"),
+      row: gridPositions[8].row,
+    },
+    {
+      id: "table-10",
+      name: "Table 10",
+      x: gridPositions[9].x,
+      y: gridPositions[9].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t10"),
+      row: gridPositions[9].row,
+    },
+    {
+      id: "table-11",
+      name: "Table 11",
+      x: gridPositions[10].x,
+      y: gridPositions[10].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t11"),
+      row: gridPositions[10].row,
+    },
+    {
+      id: "table-12",
+      name: "Table 12",
+      x: gridPositions[11].x,
+      y: gridPositions[11].y,
+      width: 20,
+      height: 28,
+      seats: generateTableSeats("t12"),
+      row: gridPositions[11].row,
+    },
+  ];
+}
+
 // Mock data generator - simulates data from Arduino CSV and database
 // Uniform seat layout: 4 seats per table (2 on top, 2 on bottom)
 function generateMockData(): Table[] {
@@ -221,7 +401,6 @@ function generateMockData(): Table[] {
 export default function OccupancyPage() {
   const [tables, setTables] = useState<Table[]>([]);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [autoRefresh, setAutoRefresh] = useState(true);
   const [totalSeats, setTotalSeats] = useState(0);
   const [occupiedSeats, setOccupiedSeats] = useState(0);
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
@@ -232,8 +411,24 @@ export default function OccupancyPage() {
   const [chatInput, setChatInput] = useState('');
   const [showPopularity, setShowPopularity] = useState(false);
 
-  // Load mock data (simulating CSV data fetch)
-  const loadData = () => {
+  // Load initial data with all zeros
+  const loadInitialData = () => {
+    const data = generateInitialData();
+    setTables(data);
+    setLastUpdate(new Date());
+    
+    // Calculate statistics
+    const total = data.reduce((sum, table) => sum + table.seats.length, 0);
+    const occupied = data.reduce(
+      (sum, table) => sum + table.seats.filter((seat) => seat.occupied).length,
+      0
+    );
+    setTotalSeats(total);
+    setOccupiedSeats(occupied);
+  };
+
+  // Randomize data (generates mock data)
+  const randomizeData = () => {
     const data = generateMockData();
     setTables(data);
     setLastUpdate(new Date());
@@ -248,44 +443,10 @@ export default function OccupancyPage() {
     setOccupiedSeats(occupied);
   };
 
-  // Initial load
+  // Initial load with zeros
   useEffect(() => {
-    loadData();
+    loadInitialData();
   }, []);
-
-  // Auto-refresh every 5 seconds
-  useEffect(() => {
-    if (!autoRefresh) return;
-
-    const interval = setInterval(() => {
-      // Simulate random changes in occupancy
-      setTables((prevTables) =>
-        prevTables.map((table) => ({
-          ...table,
-          seats: table.seats.map((seat) => ({
-            ...seat,
-            // Randomly change occupancy (10% chance)
-            occupied: Math.random() < 0.1 ? !seat.occupied : seat.occupied,
-          })),
-        }))
-      );
-      setLastUpdate(new Date());
-      
-      // Recalculate stats
-      setTables((prevTables) => {
-        const total = prevTables.reduce((sum, table) => sum + table.seats.length, 0);
-        const occupied = prevTables.reduce(
-          (sum, table) => sum + table.seats.filter((seat) => seat.occupied).length,
-          0
-        );
-        setTotalSeats(total);
-        setOccupiedSeats(occupied);
-        return prevTables;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [autoRefresh]);
 
   const occupancyPercentage = totalSeats > 0 ? Math.round((occupiedSeats / totalSeats) * 100) : 0;
 
@@ -356,10 +517,10 @@ export default function OccupancyPage() {
               Demo
             </a>
             <button
-              onClick={loadData}
+              onClick={randomizeData}
               className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
             >
-              Refresh Now
+              Randomize Data
             </button>
           </div>
         </div>
