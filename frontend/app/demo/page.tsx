@@ -244,7 +244,7 @@ export default function DemoPage() {
   useEffect(() => {
     const fetchFirstSeatData = async () => {
       try {
-        const response = await fetch("https://findmyseathackwestern.vercel.app/api/send-data/api/seats");
+        const response = await fetch("/api/seats");
         if (!response.ok) {
           throw new Error("Failed to fetch seat data");
         }
