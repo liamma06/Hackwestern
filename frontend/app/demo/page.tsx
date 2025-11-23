@@ -23,12 +23,11 @@ interface Table {
   width: number;
   height: number;
   seats: Seat[];
-  row: number; // Row index (0, 1, or 2)
+  row: number; // Row index (0, 1, 2, or 3)
 }
 
-// Mock data generator - simulates data from Arduino CSV and database
-// Uniform seat layout: 4 seats per table (2 on top, 2 on bottom)
-function generateMockData(): Table[] {
+// Generate static data with all seats vacant
+function generateDemoData(): Table[] {
   const now = new Date();
   
   // Uniform seat positions for all tables (4 seats: 2 on top, 2 on bottom) - OUTSIDE the table
@@ -43,7 +42,6 @@ function generateMockData(): Table[] {
     id: string,
     x: number,
     y: number,
-    occupied: boolean,
     popularity: number,
     totalHours: number,
     avgSession: number
@@ -51,34 +49,28 @@ function generateMockData(): Table[] {
     id,
     x,
     y,
-    occupied,
+    occupied: false, // All seats vacant
     popularity,
     totalHoursUsed: totalHours,
     averageSessionTime: avgSession,
     lastUpdated: now.toISOString(),
-    lastOccupiedAt: occupied
-      ? new Date(now.getTime() - Math.random() * 3600000).toISOString()
-      : new Date(now.getTime() - Math.random() * 86400000).toISOString(),
+    lastOccupiedAt: undefined,
   });
 
-  // Helper to generate seats with random data but uniform positions
-  const generateTableSeats = (tableId: string, basePopularity: number) => {
+  // Helper to generate seats with uniform positions, all vacant with default/zero values
+  const generateTableSeats = (tableId: string) => {
     return uniformSeatPositions.map((pos, index) => {
       const seatId = `${tableId}-s${index + 1}`;
-      const occupied = Math.random() > 0.5;
-      const popularity = Math.max(30, Math.min(100, basePopularity + (Math.random() * 40 - 20)));
-      const totalHours = Math.floor(50 + Math.random() * 150);
-      const avgSession = Math.floor(25 + Math.random() * 50);
+      // Set all tracking data to 0/default values as if app is tracking but no data collected yet
+      const popularity = 0;
+      const totalHours = 0;
+      const avgSession = 0;
       
-      return generateSeatData(seatId, pos.x, pos.y, occupied, popularity, totalHours, avgSession);
+      return generateSeatData(seatId, pos.x, pos.y, popularity, totalHours, avgSession);
     });
   };
 
   // Centered 4x3 grid layout - each row will be in its own section
-  // Tables are 20% wide, with 5% spacing between them horizontally
-  // X positions: 15%, 40% (15+20+5), 65% (40+20+5) - centered horizontally
-  // Y positions: Each row will be positioned within its own section (0-25%, 25-50%, 50-75%, 75-100%)
-  // Within each section, tables are centered vertically
   const gridPositions = [
     { x: 15, y: 15, row: 0 }, // Row 1 - in first section
     { x: 40, y: 15, row: 0 },
@@ -102,7 +94,7 @@ function generateMockData(): Table[] {
       y: gridPositions[0].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t1", 70),
+      seats: generateTableSeats("t1"),
       row: gridPositions[0].row,
     },
     {
@@ -112,7 +104,7 @@ function generateMockData(): Table[] {
       y: gridPositions[1].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t2", 85),
+      seats: generateTableSeats("t2"),
       row: gridPositions[1].row,
     },
     {
@@ -122,7 +114,7 @@ function generateMockData(): Table[] {
       y: gridPositions[2].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t3", 60),
+      seats: generateTableSeats("t3"),
       row: gridPositions[2].row,
     },
     {
@@ -132,7 +124,7 @@ function generateMockData(): Table[] {
       y: gridPositions[3].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t4", 75),
+      seats: generateTableSeats("t4"),
       row: gridPositions[3].row,
     },
     {
@@ -142,7 +134,7 @@ function generateMockData(): Table[] {
       y: gridPositions[4].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t5", 65),
+      seats: generateTableSeats("t5"),
       row: gridPositions[4].row,
     },
     {
@@ -152,7 +144,7 @@ function generateMockData(): Table[] {
       y: gridPositions[5].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t6", 80),
+      seats: generateTableSeats("t6"),
       row: gridPositions[5].row,
     },
     {
@@ -162,7 +154,7 @@ function generateMockData(): Table[] {
       y: gridPositions[6].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t7", 55),
+      seats: generateTableSeats("t7"),
       row: gridPositions[6].row,
     },
     {
@@ -172,7 +164,7 @@ function generateMockData(): Table[] {
       y: gridPositions[7].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t8", 72),
+      seats: generateTableSeats("t8"),
       row: gridPositions[7].row,
     },
     {
@@ -182,7 +174,7 @@ function generateMockData(): Table[] {
       y: gridPositions[8].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t9", 68),
+      seats: generateTableSeats("t9"),
       row: gridPositions[8].row,
     },
     {
@@ -192,7 +184,7 @@ function generateMockData(): Table[] {
       y: gridPositions[9].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t10", 72),
+      seats: generateTableSeats("t10"),
       row: gridPositions[9].row,
     },
     {
@@ -202,7 +194,7 @@ function generateMockData(): Table[] {
       y: gridPositions[10].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t11", 65),
+      seats: generateTableSeats("t11"),
       row: gridPositions[10].row,
     },
     {
@@ -212,29 +204,24 @@ function generateMockData(): Table[] {
       y: gridPositions[11].y,
       width: 20,
       height: 28,
-      seats: generateTableSeats("t12", 78),
+      seats: generateTableSeats("t12"),
       row: gridPositions[11].row,
     },
   ];
 }
 
-export default function OccupancyPage() {
+export default function DemoPage() {
   const [tables, setTables] = useState<Table[]>([]);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false);
   const [totalSeats, setTotalSeats] = useState(0);
   const [occupiedSeats, setOccupiedSeats] = useState(0);
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'bot', message: string }>>([
-    { role: 'bot', message: 'Hi! I can help you find seats. Ask me anything about seat availability or recommendations!' }
-  ]);
-  const [chatInput, setChatInput] = useState('');
   const [showPopularity, setShowPopularity] = useState(true);
 
-  // Load mock data (simulating CSV data fetch)
+  // Load demo data (all seats vacant)
   const loadData = () => {
-    const data = generateMockData();
+    const data = generateDemoData();
     setTables(data);
     setLastUpdate(new Date());
     
@@ -253,85 +240,7 @@ export default function OccupancyPage() {
     loadData();
   }, []);
 
-  // Auto-refresh every 5 seconds
-  useEffect(() => {
-    if (!autoRefresh) return;
-
-    const interval = setInterval(() => {
-      // Simulate random changes in occupancy
-      setTables((prevTables) =>
-        prevTables.map((table) => ({
-          ...table,
-          seats: table.seats.map((seat) => ({
-            ...seat,
-            // Randomly change occupancy (10% chance)
-            occupied: Math.random() < 0.1 ? !seat.occupied : seat.occupied,
-          })),
-        }))
-      );
-      setLastUpdate(new Date());
-      
-      // Recalculate stats
-      setTables((prevTables) => {
-        const total = prevTables.reduce((sum, table) => sum + table.seats.length, 0);
-        const occupied = prevTables.reduce(
-          (sum, table) => sum + table.seats.filter((seat) => seat.occupied).length,
-          0
-        );
-        setTotalSeats(total);
-        setOccupiedSeats(occupied);
-        return prevTables;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [autoRefresh]);
-
   const occupancyPercentage = totalSeats > 0 ? Math.round((occupiedSeats / totalSeats) * 100) : 0;
-
-  const handleSendMessage = async () => {
-    if (!chatInput.trim()) return;
-    
-    // Add user message
-    setChatMessages(prev => [...prev, { role: 'user', message: chatInput }]);
-    setChatInput('');
-    
-    try {
-      const response = await fetch('http://localhost:8000/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: chatInput })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        setChatMessages(prev => [...prev, { role: 'bot', message: result.message }]);
-      }
-    } catch (error) {
-      console.error('Chat error:', error);
-      setChatMessages(prev => [...prev, { 
-        role: 'bot', 
-        message: 'Sorry, I had trouble processing that. Please try again.' 
-      }]);
-    }
-  };
-
-  const generateBotResponse = (input: string): string => {
-    const lowerInput = input.toLowerCase();
-    
-    if (lowerInput.includes('available') || lowerInput.includes('free')) {
-      return `There are currently ${totalSeats - occupiedSeats} available seats out of ${totalSeats} total seats (${Math.round(((totalSeats - occupiedSeats) / totalSeats) * 100)}% available).`;
-    } else if (lowerInput.includes('popular') || lowerInput.includes('best')) {
-      const topSeat = tables.flatMap(t => t.seats).sort((a, b) => b.popularity - a.popularity)[0];
-      return `The most popular seat is ${topSeat?.id} with ${topSeat?.popularity}% popularity and an average session time of ${topSeat?.averageSessionTime} minutes.`;
-    } else if (lowerInput.includes('quiet') || lowerInput.includes('least')) {
-      const quietSeats = tables.flatMap(t => t.seats).filter(s => !s.occupied && s.popularity < 60);
-      return `I found ${quietSeats.length} quiet seats with low traffic. Try seats: ${quietSeats.slice(0, 3).map(s => s.id).join(', ')}.`;
-    }
-    
-    return "I can help you find available seats, recommend popular spots, or suggest quiet areas. What would you like to know?";
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-950 dark:to-black">
@@ -340,7 +249,7 @@ export default function OccupancyPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"></div>
-            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Find My Seat</span>
+            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Find My Seat - Demo</span>
           </div>
           <div className="flex items-center gap-4">
             <a
@@ -350,16 +259,16 @@ export default function OccupancyPage() {
               Home
             </a>
             <a
-              href="/demo"
+              href="/map"
               className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
             >
-              Demo
+              Live Map
             </a>
             <button
               onClick={loadData}
               className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
             >
-              Refresh Now
+              Refresh
             </button>
           </div>
         </div>
@@ -471,40 +380,40 @@ export default function OccupancyPage() {
                       height: `${table.height}%`,
                     }}
                   >
-              {/* Table Label - centered in the middle of the table */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-base font-semibold text-zinc-700 dark:text-zinc-300 bg-white/90 dark:bg-zinc-900/90 px-3 py-1 rounded whitespace-nowrap z-10 shadow-sm">
-                {table.name}
-              </div>
+                    {/* Table Label - centered in the middle of the table */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-base font-semibold text-zinc-700 dark:text-zinc-300 bg-white/90 dark:bg-zinc-900/90 px-3 py-1 rounded whitespace-nowrap z-10 shadow-sm">
+                      {table.name}
+                    </div>
 
-              {/* Seats */}
-              {table.seats.map((seat) => {
-                // Determine popularity indicator color - red for high, yellow for medium
-                const popularityColor = showPopularity
-                  ? seat.popularity >= 80
-                    ? "ring-2 ring-red-500 ring-offset-1"
-                    : seat.popularity >= 60
-                    ? "ring-2 ring-yellow-400 ring-offset-1"
-                    : ""
-                  : "";
-                
-                return (
-                  <div
-                    key={seat.id}
-                    onClick={() => setSelectedSeat(seat)}
-                    className={`absolute h-8 w-8 rounded-full border-2 transition-all hover:scale-125 cursor-pointer z-20 ${popularityColor} ${
-                      seat.occupied
-                        ? "border-purple-700 bg-purple-500 shadow-lg shadow-purple-500/50 dark:border-purple-400 dark:bg-purple-600"
-                        : "border-blue-700 bg-blue-500 shadow-lg shadow-blue-500/50 dark:border-blue-400 dark:bg-blue-600"
-                    }`}
-                    style={{
-                      left: `${seat.x}%`,
-                      top: `${seat.y}%`,
-                      transform: "translate(-50%, -50%)",
-                    }}
-                    title={`${seat.id} - ${seat.occupied ? "Occupied" : "Available"} | Popularity: ${seat.popularity}%`}
-                  />
-                );
-              })}
+                    {/* Seats */}
+                    {table.seats.map((seat) => {
+                      // Determine popularity indicator color - red for high, yellow for medium
+                      const popularityColor = showPopularity
+                        ? seat.popularity >= 80
+                          ? "ring-2 ring-red-500 ring-offset-1"
+                          : seat.popularity >= 60
+                          ? "ring-2 ring-yellow-400 ring-offset-1"
+                          : ""
+                        : "";
+                      
+                      return (
+                        <div
+                          key={seat.id}
+                          onClick={() => setSelectedSeat(seat)}
+                          className={`absolute h-8 w-8 rounded-full border-2 transition-all hover:scale-125 cursor-pointer z-20 ${popularityColor} ${
+                            seat.occupied
+                              ? "border-purple-700 bg-purple-500 shadow-lg shadow-purple-500/50 dark:border-purple-400 dark:bg-purple-600"
+                              : "border-blue-700 bg-blue-500 shadow-lg shadow-blue-500/50 dark:border-blue-400 dark:bg-blue-600"
+                          }`}
+                          style={{
+                            left: `${seat.x}%`,
+                            top: `${seat.y}%`,
+                            transform: "translate(-50%, -50%)",
+                          }}
+                          title={`${seat.id} - ${seat.occupied ? "Occupied" : "Available"} | Popularity: ${seat.popularity}%`}
+                        />
+                      );
+                    })}
                   </div>
                 ))}
             </div>
@@ -556,9 +465,7 @@ export default function OccupancyPage() {
         {/* Instructions */}
         <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            <strong className="text-zinc-900 dark:text-zinc-50">Note:</strong> This page displays real-time seat
-            occupancy data from Arduino sensors. Click on seats to view detailed information. Yellow ring indicates high popularity (80%+). Data updates automatically every
-            5 seconds when auto-refresh is enabled.
+            <strong className="text-zinc-900 dark:text-zinc-50">Demo Mode:</strong> This page displays the seat layout with all seats currently vacant. Click on seats to view detailed information. This demo uses static data and does not update automatically.
           </p>
         </div>
       </div>
@@ -594,7 +501,7 @@ export default function OccupancyPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Status</p>
-                <p className={`text-xl font-semibold ${selectedSeat.occupied ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                <p className={`text-xl font-semibold ${selectedSeat.occupied ? "text-purple-600 dark:text-purple-400" : "text-blue-600 dark:text-blue-400"}`}>
                   {selectedSeat.occupied ? "Occupied" : "Available"}
                 </p>
               </div>
@@ -606,181 +513,9 @@ export default function OccupancyPage() {
                     <div
                       className={`h-3 rounded-full transition-all ${
                         selectedSeat.popularity >= 80
-                          ? "bg-yellow-500"
+                          ? "bg-red-500"
                           : selectedSeat.popularity >= 60
-                          ? "bg-blue-500"
-                          : "bg-zinc-400"
-                      }`}
-                      style={{ width: `${selectedSeat.popularity}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Total Hours Used</p>
-                <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.totalHoursUsed} hrs</p>
-              </div>
-              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Average Session Time</p>
-                <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.averageSessionTime} min</p>
-              </div>
-              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Last Updated</p>
-                <p className="text-sm text-zinc-900 dark:text-zinc-50">
-                  {new Date(selectedSeat.lastUpdated || "").toLocaleString()}
-                </p>
-              </div>
-              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Last Occupied</p>
-                <p className="text-sm text-zinc-900 dark:text-zinc-50">
-                  {selectedSeat.lastOccupiedAt
-                    ? new Date(selectedSeat.lastOccupiedAt).toLocaleString()
-                    : "Never"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Floating Chat Button */}
-      <button
-        onClick={() => setChatOpen(!chatOpen)}
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-2xl transition-transform hover:scale-110"
-        aria-label="Toggle chat"
-      >
-        {chatOpen ? (
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
-        )}
-      </button>
-
-      {/* Chat Slide-out Panel */}
-      <div
-        className={`fixed bottom-0 right-0 z-50 h-[600px] w-full max-w-md transform transition-transform duration-300 ${
-          chatOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <div className="h-full rounded-l-2xl border-l border-t border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
-          {/* Chat Header */}
-          <div className="flex items-center justify-between border-b border-zinc-200 p-4 dark:border-zinc-800">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">Seat Assistant</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Online</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setChatOpen(false)}
-              className="rounded-full p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ height: 'calc(100% - 140px)' }}>
-            {chatMessages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                    msg.role === 'user'
-                      ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
-                      : 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50'
-                  }`}
-                >
-                  <p className="text-sm">{msg.message}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Chat Input */}
-          <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask about seats..."
-                className="flex-1 rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!chatInput.trim()}
-                className="rounded-full bg-gradient-to-br from-blue-500 to-purple-600 p-2 text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Seat Details Modal Popup */}
-      {selectedSeat && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedSeat(null)}
-        >
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-          
-          {/* Modal Content */}
-          <div
-            className="relative w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between mb-6">
-              <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-                Seat Details: {selectedSeat.id}
-              </h3>
-              <button
-                onClick={() => setSelectedSeat(null)}
-                className="rounded-full p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                aria-label="Close"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Status</p>
-                <p className={`text-xl font-semibold ${selectedSeat.occupied ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
-                  {selectedSeat.occupied ? "Occupied" : "Available"}
-                </p>
-              </div>
-              <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Popularity Score</p>
-                <div className="space-y-2">
-                  <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{selectedSeat.popularity}%</p>
-                  <div className="h-3 bg-zinc-200 rounded-full dark:bg-zinc-700">
-                    <div
-                      className={`h-3 rounded-full transition-all ${
-                        selectedSeat.popularity >= 80
                           ? "bg-yellow-500"
-                          : selectedSeat.popularity >= 60
-                          ? "bg-blue-500"
                           : "bg-zinc-400"
                       }`}
                       style={{ width: `${selectedSeat.popularity}%` }}
