@@ -453,21 +453,42 @@ export default function OccupancyPage() {
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
     
+    const userMessage = chatInput.trim();
+    
     // Add user message
-    setChatMessages(prev => [...prev, { role: 'user', message: chatInput }]);
+    setChatMessages(prev => [...prev, { role: 'user', message: userMessage }]);
     setChatInput('');
     
+    // Prepare seat data for the API
+    const allSeats = tables.flatMap(table => 
+      table.seats.map(seat => ({
+        id: seat.id,
+        occupied: seat.occupied,
+        popularity: seat.popularity,
+        totalHoursUsed: seat.totalHoursUsed,
+        averageSessionTime: seat.averageSessionTime,
+      }))
+    );
+    
     try {
-      const response = await fetch('http://localhost:8000/api/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: chatInput })
+        body: JSON.stringify({ 
+          message: userMessage,
+          seatData: allSeats
+        })
       });
       
       const result = await response.json();
       
       if (result.success) {
         setChatMessages(prev => [...prev, { role: 'bot', message: result.message }]);
+      } else {
+        setChatMessages(prev => [...prev, { 
+          role: 'bot', 
+          message: result.message || 'Sorry, I had trouble processing that. Please try again.' 
+        }]);
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -800,6 +821,84 @@ export default function OccupancyPage() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Bot Button - Floating */}
+      <button
+        onClick={() => setChatOpen(!chatOpen)}
+        className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center"
+        aria-label="Open chat"
+      >
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      </button>
+
+      {/* Chat Popup */}
+      {chatOpen && (
+        <div className="fixed bottom-24 right-6 z-50 w-96 h-[500px] rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 flex flex-col">
+          {/* Chat Header */}
+          <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-2xl">
+            <h3 className="text-lg font-bold text-white">Seat Finder Assistant</h3>
+            <button
+              onClick={() => setChatOpen(false)}
+              className="rounded-full p-1 text-white hover:bg-white/20 transition-colors"
+              aria-label="Close chat"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {chatMessages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                    msg.role === 'user'
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Chat Input */}
+          <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex gap-2"
+            >
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Ask me to find a seat..."
+                className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                disabled={!chatInput.trim()}
+                className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2 text-white font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </button>
+            </form>
           </div>
         </div>
       )}
