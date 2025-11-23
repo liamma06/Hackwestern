@@ -73,7 +73,26 @@ export default function HomePage() {
       <nav className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-black/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"></div>
+            <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#dc2626" />
+                </linearGradient>
+              </defs>
+              {/* Chair back */}
+              <rect x="9" y="2" width="6" height="8" rx="1" fill="url(#logoGradient)" />
+              {/* Chair seat */}
+              <rect x="5" y="10" width="14" height="3" rx="1" fill="url(#logoGradient)" />
+              {/* Armrests */}
+              <path d="M 5 8 L 7 8 L 7 10" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M 17 8 L 19 8 L 19 10" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              {/* Legs */}
+              <line x1="6" y1="13" x2="6" y2="19" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="18" y1="13" x2="18" y2="19" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="9" y1="13" x2="9" y2="19" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="15" y1="13" x2="15" y2="19" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
             <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Find My Seat</span>
           </div>
           <div className="hidden items-center gap-6 md:flex">
@@ -172,7 +191,7 @@ export default function HomePage() {
             </div>
             <h1 className="relative z-10 text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-6xl lg:text-7xl">
               The Future of
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Real-Time Seating Solutions</span>
+              <span className="bg-gradient-to-r from-blue-600 via-purple-900 to-red-600 bg-clip-text text-transparent"> Real-Time Seating Solutions</span>
             </h1>
           </div>
           <p className="mb-10 text-lg leading-8 text-zinc-600 dark:text-zinc-400 sm:text-xl">
@@ -228,7 +247,7 @@ export default function HomePage() {
             },
             {
               title: "Visual Heatmap",
-              description: "Interactive map shows seat availability at a glance. Green for available, red for occupied - no guessing needed.",
+              description: "Interactive map shows seat availability at a glance. Blue for available, red for occupied - no guessing needed.",
               icon: "🗺️",
             },
             {

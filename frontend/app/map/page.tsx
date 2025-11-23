@@ -521,7 +521,26 @@ export default function OccupancyPage() {
       <nav className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-black/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"></div>
+            <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#dc2626" />
+                </linearGradient>
+              </defs>
+              {/* Chair back */}
+              <rect x="9" y="2" width="6" height="8" rx="1" fill="url(#logoGradient)" />
+              {/* Chair seat */}
+              <rect x="5" y="10" width="14" height="3" rx="1" fill="url(#logoGradient)" />
+              {/* Armrests */}
+              <path d="M 5 8 L 7 8 L 7 10" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M 17 8 L 19 8 L 19 10" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              {/* Legs */}
+              <line x1="6" y1="13" x2="6" y2="19" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="18" y1="13" x2="18" y2="19" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="9" y1="13" x2="9" y2="19" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="15" y1="13" x2="15" y2="19" stroke="url(#logoGradient)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
             <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Find My Seat</span>
           </div>
           <div className="flex items-center gap-4">
@@ -558,7 +577,7 @@ export default function OccupancyPage() {
               </div>
               <div>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">Occupied</p>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{occupiedSeats}</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">{occupiedSeats}</p>
               </div>
               <div>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">Available</p>
@@ -603,9 +622,9 @@ export default function OccupancyPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-5 w-5 rounded-full bg-purple-500 border-2 border-purple-700"></div>
+              <div className="h-5 w-5 rounded-full bg-red-500 border-2 border-red-700"></div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">Purple</span>
+                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">Red</span>
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">Occupied Seat</span>
               </div>
             </div>
@@ -673,11 +692,11 @@ export default function OccupancyPage() {
                   <div
                     key={seat.id}
                     onClick={() => setSelectedSeat(seat)}
-                    className={`absolute h-8 w-8 rounded-full border-2 transition-all hover:scale-125 cursor-pointer z-20 ${popularityColor} ${
-                      seat.occupied
-                        ? "border-purple-700 bg-purple-500 shadow-lg shadow-purple-500/50 dark:border-purple-400 dark:bg-purple-600"
-                        : "border-blue-700 bg-blue-500 shadow-lg shadow-blue-500/50 dark:border-blue-400 dark:bg-blue-600"
-                    }`}
+                          className={`absolute h-8 w-8 rounded-full border-2 transition-all hover:scale-125 cursor-pointer z-20 ${popularityColor} ${
+                            seat.occupied
+                              ? "border-red-700 bg-red-500 shadow-lg shadow-red-500/50 dark:border-red-400 dark:bg-red-600"
+                              : "border-blue-700 bg-blue-500 shadow-lg shadow-blue-500/50 dark:border-blue-400 dark:bg-blue-600"
+                          }`}
                     style={{
                       left: `${seat.x}%`,
                       top: `${seat.y}%`,
@@ -776,7 +795,7 @@ export default function OccupancyPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Status</p>
-                <p className={`text-xl font-semibold ${selectedSeat.occupied ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                <p className={`text-xl font-semibold ${selectedSeat.occupied ? "text-red-600 dark:text-red-400" : "text-blue-600 dark:text-blue-400"}`}>
                   {selectedSeat.occupied ? "Occupied" : "Available"}
                 </p>
               </div>
