@@ -1,1 +1,11 @@
 backend/doomscroll-5c8f3-firebase-adminsdk-fbsvc-d2faaf2383.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+*.env
+.DS_Store
