@@ -5,44 +5,60 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     console.log('Received data:', data);
-    
-    // Handle different input formats
-    // Raspberry Pi sends: true = vacant, false = occupied
+
     let isVacant: boolean;
-    
+
     if (typeof data === 'boolean') {
-      isVacant = data; // true = vacant, false = occupied
+      // Direct boolean
+      isVacant = data;
+
     } else if (typeof data === 'object' && data !== null) {
-      // Could be { status: true } or { vacant: true } or { occupied: false }
+      
+      // Accept ANY of the following fields:
+      // { status: true }
+      // { vacant: true }
+      // { occupied: false }
+      // { states: false }
+      
       if (data.status !== undefined) {
         isVacant = data.status;
+
       } else if (data.vacant !== undefined) {
         isVacant = data.vacant;
+
       } else if (data.occupied !== undefined) {
-        isVacant = !data.occupied; // occupied: false means vacant: true
+        isVacant = !data.occupied;
+
+      } else if (data.states !== undefined) {
+        // RASPBERRY PI NEW FORMAT
+        // states = false means occupied
+        isVacant = data.states;
+
       } else {
-        isVacant = true; // Default to vacant if no field found
+        // Default fallback
+        isVacant = true;
       }
+
     } else {
       return NextResponse.json(
-        { error: 'Invalid data format. Expected boolean or object with status field.' },
+        { error: 'Invalid data format. Expected boolean or object.' },
         { status: 400 }
       );
     }
-    
-    // Update seat data
-    // true = vacant (0), false = occupied (1)
+
+    // Update seat data (1 = occupied, 0 = vacant)
     updateSeatData({
       occupied: isVacant ? 0 : 1,
     });
-    
+
     const currentData = getSeatData();
-    
+
     return NextResponse.json({
       status: 'success',
       received: isVacant ? 'vacant' : 'occupied',
-      seatData: currentData
+      seatData: currentData,
     });
+
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to process request', details: String(error) },
