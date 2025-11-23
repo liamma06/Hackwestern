@@ -1,13 +1,20 @@
-from fastapi import FastAPI, Depends, HTTPException, Header, WebSocket
+from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials, auth
 import os
 from dotenv import load_dotenv
 from google import genai
+from pydantic import BaseModel
 
 # Load environment variables
 load_dotenv()
+
+class GPIOData(BaseModel):
+    pin: int
+    state: int
+
+
 
 # Initialize Firebase Admin with env variable
 firebase_creds_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-service-account.json")
@@ -20,45 +27,50 @@ app = FastAPI()
 # Configure CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# Configure Gemini
-...existing code...
 
-# --- WebSocket seat state broadcasting ---
-seat_states = {}
-clients = set()
+@app.post("/gpio")
+async def update_gpio(data: GPIOData):
+    print(f"Received GPIO data: {data}")
+    return {"status": "received"}
+
+# --- Seat state and WebSocket logic ---
+from fastapi import WebSocket
+
+seat_states = {}      # e.g., {1: 1, 2: 0, 3: 1}
+clients = []
 
 @app.post("/update")
 async def update_state(data: dict):
     seat_id = data["seat_id"]
     status = data["status"]
+
     seat_states[seat_id] = status
 
     # broadcast update
-    disconnected = set()
     for ws in clients:
-        try:
-            await ws.send_json({"seat_id": seat_id, "status": status})
-        except:
-            disconnected.add(ws)
-    clients.difference_update(disconnected)
+        await ws.send_json({"seat_id": seat_id, "status": status})
 
     return {"ok": True}
 
 @app.websocket("/ws")
 async def websocket(ws: WebSocket):
     await ws.accept()
-    clients.add(ws)
+    clients.append(ws)
+
+    # Send all current seat states
     await ws.send_json(seat_states)
+
     try:
         while True:
             await ws.receive_text()
-    except:
-        clients.discard(ws)
+    except Exception:
+        if ws in clients:
+            clients.remove(ws)
 
 # Simple auth dependency
 async def get_user_id(authorization: str = Header(...)):
@@ -117,7 +129,10 @@ async def chat_with_bot(payload: dict):
         - Most popular seats: {', '.join([s['id'] for s in popular_seats])}
         - Quiet available seats: {', '.join([s['id'] for s in quiet_seats])}
 
-        Answer the user's question helpfully and concisely."""
+        Answer the user's question helpfully and concisely and fitting thier needs.
+        For example, if they ask for a quiet seat, suggest from the quiet available seats.
+        For example, if they ask for a popular seat, suggest from the most popular seats.
+        """
 
         # Call Gemini using new API
         response = client.models.generate_content(
