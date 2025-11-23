@@ -4,6 +4,7 @@ import { getSeatData, updateSeatData } from '../seat-storage';
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
+    console.log('Received data:', data);
     
     // Handle different input formats
     // Raspberry Pi sends: true = vacant, false = occupied
