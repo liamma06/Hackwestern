@@ -217,7 +217,7 @@ export default function DemoPage() {
   const [totalSeats, setTotalSeats] = useState(0);
   const [occupiedSeats, setOccupiedSeats] = useState(0);
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
-  const [showPopularity, setShowPopularity] = useState(true);
+  const [showPopularity, setShowPopularity] = useState(false);
 
   // Load demo data (all seats vacant)
   const loadData = () => {
@@ -239,6 +239,80 @@ export default function DemoPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Fetch data for first seat from FastAPI
+  useEffect(() => {
+    const fetchFirstSeatData = async () => {
+      try {
+        const response = await fetch("http://YOUR_SERVER_IP:8000/api/seats");
+        if (!response.ok) {
+          throw new Error("Failed to fetch seat data");
+        }
+        
+        const data = await response.json();
+        
+        // Handle different response formats
+        // If it's an array, get the first item; if it's an object, use it directly
+        const seatData = Array.isArray(data) ? data[0] : data;
+        
+        // Update the first seat (first table, first seat - t1-s1)
+        setTables((prevTables) => {
+          const updatedTables = [...prevTables];
+          if (updatedTables.length > 0 && updatedTables[0].seats.length > 0) {
+            const firstSeat = updatedTables[0].seats[0];
+            
+            // Update seat data based on API response
+            // API returns 0 or 1 for vacant/occupied
+            let isOccupied = false;
+            if (typeof seatData === 'number') {
+              // Direct number: 0 = vacant, 1 = occupied
+              isOccupied = seatData === 1;
+            } else if (typeof seatData === 'object') {
+              // Object with occupied field (0 or 1)
+              isOccupied = seatData.occupied === 1 || seatData.occupied === true || seatData.status === 1;
+            }
+            
+            const updatedSeat: Seat = {
+              ...firstSeat,
+              occupied: isOccupied,
+              popularity: seatData?.popularity ?? seatData?.popularity_score ?? firstSeat.popularity,
+              totalHoursUsed: seatData?.totalHoursUsed ?? seatData?.total_hours_used ?? seatData?.totalHours ?? firstSeat.totalHoursUsed,
+              averageSessionTime: seatData?.averageSessionTime ?? seatData?.average_session_time ?? seatData?.avgSession ?? firstSeat.averageSessionTime,
+              lastUpdated: new Date().toISOString(),
+              lastOccupiedAt: isOccupied ? new Date().toISOString() : firstSeat.lastOccupiedAt,
+            };
+            
+            updatedTables[0] = {
+              ...updatedTables[0],
+              seats: [updatedSeat, ...updatedTables[0].seats.slice(1)],
+            };
+            
+            // Recalculate statistics
+            const total = updatedTables.reduce((sum, table) => sum + table.seats.length, 0);
+            const occupied = updatedTables.reduce(
+              (sum, table) => sum + table.seats.filter((seat) => seat.occupied).length,
+              0
+            );
+            setTotalSeats(total);
+            setOccupiedSeats(occupied);
+          }
+          return updatedTables;
+        });
+      } catch (error) {
+        console.error("Error fetching seat data:", error);
+        // Silently fail - demo page should still work without API
+      }
+    };
+
+    // Only fetch if tables are loaded
+    if (tables.length > 0) {
+      fetchFirstSeatData();
+      
+      // Optionally set up polling to refresh data periodically
+      const interval = setInterval(fetchFirstSeatData, 5000); // Refresh every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [tables.length]); // Only run when tables are initially loaded
 
   const occupancyPercentage = totalSeats > 0 ? Math.round((occupiedSeats / totalSeats) * 100) : 0;
 

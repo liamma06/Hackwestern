@@ -230,7 +230,7 @@ export default function OccupancyPage() {
     { role: 'bot', message: 'Hi! I can help you find seats. Ask me anything about seat availability or recommendations!' }
   ]);
   const [chatInput, setChatInput] = useState('');
-  const [showPopularity, setShowPopularity] = useState(true);
+  const [showPopularity, setShowPopularity] = useState(false);
 
   // Load mock data (simulating CSV data fetch)
   const loadData = () => {
